@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Implementing Tymoczko's (2011) Principles of Tonality in Euterpea</title>
+</head>
+<body>
+	<h1>Implementing Tymoczko's (2011) Principles of Tonality in Euterpea</h1>
+	<div id ='main' align='justify'>
+		Dmitri Tymoczko has argued that five formal features can jointly explain tonality in "a wide range of genres, Western and non-Western, past and present."<a href="#n1" name="r1"><sup>[1]</sup></a> The five are listed below.
+	</div>
+	<ol>
+		<li/>Conjunct melodic motion. Melodies tend to move by short distances from note to note.
+		<li/>Acoustic consonance. Consonant harmonies are preferred to dissonant harmonies, and tend to be used at points of musical stability.
+		<li/>Harmonic consistency. The harmonies in a passage of music, whatever they may be, tend to be structurally similar to one another.
+		<li/>Limited macroharmony. I use the term "macroharmony" to refer to the total collection of notes heard over moderate spans of musical time. Tonal music tends to use relatively small macroharmonies, often involving five to eight notes.
+		<li/>Centricity. Over moderate spans of musical time, one note is heard as being more prominent than the others, appearing more frequently and serving as a goal of musical motion.
+	</ol>
+	<div id='main'; align='justify'>
+		One proof of the validity of the five features is the additive way in which they affect human judgments. When exposed to chords that obey one of the principles, human subjects prefer them to random chords (Tymoczko takes this as a given). Chords that obey two principles should be more pleasing than those obeying one, and so forth. Computing languages offer an easy way to generate random chords and then apply combinations of the tonal constraints  In an email correspondence, Tymoczko wrote that he uses Python (mainly the Music21 library and MAX for Ableton Live.<a href='#n2' name='r2'><sup>[2]</sup></a> But I was struck by the chiastic structure of Tymocko's goals for his geometric music and that of Euterpea, a Haskell library lead written by Paul Hudak of Yale's Computer Science department. Two YouTube videos well exemplify this. 
+	</div>
+	<div id="notes">
+	<h3>Notes</h3>
+	<ol>
+		<li/>Dmitri Tymoczko, <i>A Geometry of Music: Harmony and Counterpoint in the Extended Common Practice</i> (New York, NY: Oxford University Press, 2011), 4. <a href="r1" name="#nl">[Back]</a>
+		<li>Dmitri Tymocko, Email correspondence of 10 October, 2013.<a href='r2' name='#n2'>[Back]</a> 
+	</ol> 
+	</div>
+</body>
+</html>
+
+
+
+
+<pre name="code" class="haskell: ghci">
+ghci&gt; :t 'a'
+'a' :: Char
+ghci&gt; :t True
+True :: Bool
+ghci&gt; :t "HELLO!"
+"HELLO!" :: [Char]
+ghci&gt; :t (True, 'a')
+(True, 'a') :: (Bool, Char)
+ghci&gt; :t 4 == 5
+4 == 5 :: Bool
+</pre>
