@@ -1,9 +1,52 @@
---Generates a random sequence of notes based on a binomial probability density function--
 import Euterpea
 import System.Random
 import System.Random.Distributions
 import qualified Data.MarkovChain as M
 
+--Step 1: Generate Notes--
+
+sGen :: StdGen
+sGen = mkStdGen 42
+
+toAbsP1 :: Float -> AbsPitch
+toAbsP1 x = round (40 * x + 30)
+
+mkNote1 :: AbsPitch -> Music Pitch
+mkNote1 = note en . pitch
+
+mkLine1 :: [AbsPitch] -> Music Pitch
+mkLine1 rands = line (take 128 (map mkNote1 rands))
+
+m4 :: Float -> Float -> Music Pitch
+m4 sig mu = let rs1 = rands (gaussian sig mu) sGen
+	in mkLine1 (map toAbsP1 rs1)
+
+{-
+
+-- |Melodies tend to move by short distances from note to note.
+conjunctMotion :: [Music] -> [Music]
+conjunctMotion t = t
+
+-- |Consonant harmonies are preferred to dissonant harmonies, tend to be used at points of musical stability.
+acousticConsonance :: [Music] -> [Music]
+acousticConsonance t = t
+
+-- |The harmonies in a passage of music tend to be structurally similar to one another.
+harmonicConsistency :: [Music] -> [Music]
+harmonicConsistency t = t
+
+-- |Tonal music tends to use relatively small macroharmonies, often involving five to eight notes.
+limitedMacroharmony :: [Music] -> [Music]
+limitedMacroharmony t = t
+
+-- |Over moderate spans of musical time, one note is heard as being more prominent than the others.
+centricity :: [Music] -> [Music]
+centricity t = t 
+
+-}
+
+
+-- OLD STUFF --
 
 
 mel :: [AbsPitch] -> Music Pitch
@@ -29,19 +72,3 @@ twoFiveOne p d = let
 		chord2 = note d (trans 5 p) :=: note d (trans 9 p) :=: note d (trans 12 p)
 		chord3 = note (d*2) (trans (-2) p) :=: note (d*2) (trans 2 p) :=: note (d*2) (trans 5 p) 
 	in chord1 :+: chord2 :+: chord3
-
-sGen :: StdGen
-sGen = mkStdGen 42
-
-toAbsP1 :: Float -> AbsPitch
-toAbsP1 x = round (40 * x + 30)
-
-mkNote1 :: AbsPitch -> Music Pitch
-mkNote1 = note en . pitch
-
-mkLine1 :: [AbsPitch] -> Music Pitch
-mkLine1 rands = line (take 128 (map mkNote1 rands))
-
-m4 :: Float -> Float -> Music Pitch
-m4 sig mu = let rs1 = rands (gaussian sig mu) sGen
-	in mkLine1 (map toAbsP1 rs1)
