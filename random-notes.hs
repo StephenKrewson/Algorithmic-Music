@@ -72,3 +72,65 @@ twoFiveOne p d = let
 		chord2 = note d (trans 5 p) :=: note d (trans 9 p) :=: note d (trans 12 p)
 		chord3 = note (d*2) (trans (-2) p) :=: note (d*2) (trans 2 p) :=: note (d*2) (trans 5 p) 
 	in chord1 :+: chord2 :+: chord3
+
+import Euterpea
+import System.Random
+import System.Random.Distributions
+import qualified Data.MarkovChain as M
+
+sGen :: StdGen
+sGen = mkStdGen 42
+
+randInts :: StdGen -> [Int]
+randInts g = let (x, g') = next g
+	in x: randInts g'
+
+randIntegers :: [Integer]
+randIntegers = randomRs (30, 70) sGen
+
+makeLine :: Int -> [Integer]
+makeLine n = take n randIntegers
+
+findAfterStar :: [Char] -> Maybe Char
+findAfterStar (c:d:r) =
+	if c == '*' then Just d
+	else findAfterStar (d:r)
+findAfterStar _ = Nothing
+
+data Cluster = Cluster SNote [Cluster]
+type SNote = (Dur, AbsPitch)
+
+selfSim :: [SNote] -> Cluster
+selfSim pat = Cluster (0,0) (map mkCluster pat)
+	where mkCluster note =
+		Cluster note (map (mkCluster . addMult note) pat)
+addMult :: SNote -> SNote -> SNote
+addMult (d0, p0) (d1, p1) = (d0 * d1, p0 * p1)
+
+fringe :: Int -> Cluster -> [SNote]
+fringe 0 (Cluster note cls) = [note]
+fringe n (Cluster note cls) = concatMap (fringe (n - 1)) cls
+
+simToMusic :: [SNote] -> Music Pitch
+simToMusic = line . map mkNote
+mkNote :: (Dur, AbsPitch) -> Music Pitch
+mkNote (d, ap) = note d (pitch ap)
+
+ss pat n tr te =
+	transpose tr $ tempo te $ simToMusic $ fringe n $ selfSim pat
+
+m0 :: [SNote]
+m0 = [(1,2), (1,0), (1,5), (1,7)]
+tm0 = instrument Vibraphone (ss m0 4 50 20)
+
+m1 :: [SNote]
+m1 = [(1,0), (0.5,0), (0.5,0)]
+tm1 = instrument Percussion (ss m1 4 43 2)
+
+m3 :: [SNote]
+m3 = [(hn, 2), (qn, 3), (qn, 0), (hn, 8)]
+tm3 = ss m3 4 50 (1/4)
+ttm3 = 	let 	l1 = instrument Flute tm3
+		l2 = instrument AcousticBass $
+			transpose (-9) (revM tm3)
+	in l1 :=: l2
