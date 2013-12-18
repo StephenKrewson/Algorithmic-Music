@@ -1,0 +1,91 @@
+#content {
+	float: left;
+	width: 60%;
+	text-align: justify;
+	color: white;
+	font-family: arial;
+	background: #0F4D92;
+}
+
+code {
+	background: gray;
+	opacity: 0.75;
+}
+pre {
+	background: gray;
+	white-space: pre-wrap;
+	opacity: 0.75;
+	font-weight: bold;
+}
+
+p {
+	font-size: 10pt;
+	padding: 10 10 10 10px;
+}
+
+a:link {color: white;}
+a:hover{color: gray; opacity: 0.5}
+a:visited {color: white;}
+
+/*
+.imageLabel {color: white; font-family: arial; font-size: small}
+.droid {font-family: "droid"; arial;}
+
+
+ol.custom li {margin: 0 20px 20px 0;}
+ol.custom {
+    list-style-type: none; 
+}
+
+
+a.menu {color: white; font-family: arial; margin: 20px}
+a:link {color:white; font-family: arial; text-decoration: none;}      
+a:visited {color:white; font-family: arial;}  
+a:hover {color:#8a868a;}  
+a:active {color:white; font-family: arial;}  
+
+
+#container { 
+	float: left;
+	width: 100%; 
+	background: #0F4D92;
+	margin-right: -200px; 
+}
+#sidebar {
+	float: left; 
+	width: 250px;
+	background: #0F4D92;
+	border-right: 4px solid white;
+	padding: 10px;
+}
+#mainContent { 
+	float: left;
+	width: 500;
+	margin: auto auto;
+	padding: 10px;
+	text-align: justify;
+} 
+#note {
+	color: white;
+	font-size: small;
+	font-family: arial;
+	border: 1px solid white;
+}
+
+
+@font-face {
+	font-family: "droid"; 
+	src: url(../type/Droid-Serif/DroidSerif-Regular.ttf); 
+	format("truetype");
+}
+
+
+p {font-family:arial; color:white}
+li {font-family:arial; color:white}
+h1 {color:white; font-family:droid}
+h2 {color:white; font-family:droid}
+h3 {color:white; font-family:arial}
+h4 {color:white; font-family:arial}
+code {color: white; background: gray;}
+body {background:#0F4D92}
+*/

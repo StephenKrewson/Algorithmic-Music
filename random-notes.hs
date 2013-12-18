@@ -4,7 +4,7 @@ import System.Random.Distributions
 import qualified Data.MarkovChain as M
 
 --Step 1: Generate Notes--
-
+{-
 sGen :: StdGen
 sGen = mkStdGen 42
 
@@ -21,7 +21,7 @@ m4 :: Float -> Float -> Music Pitch
 m4 sig mu = let rs1 = rands (gaussian sig mu) sGen
 	in mkLine1 (map toAbsP1 rs1)
 
-{-
+
 
 -- |Melodies tend to move by short distances from note to note.
 conjunctMotion :: [Music] -> [Music]
@@ -73,23 +73,19 @@ twoFiveOne p d = let
 		chord3 = note (d*2) (trans (-2) p) :=: note (d*2) (trans 2 p) :=: note (d*2) (trans 5 p) 
 	in chord1 :+: chord2 :+: chord3
 
-import Euterpea
-import System.Random
-import System.Random.Distributions
-import qualified Data.MarkovChain as M
-
 sGen :: StdGen
 sGen = mkStdGen 42
-
-randInts :: StdGen -> [Int]
-randInts g = let (x, g') = next g
-	in x: randInts g'
 
 randIntegers :: [Integer]
 randIntegers = randomRs (30, 70) sGen
 
-makeLine :: Int -> [Integer]
-makeLine n = take n randIntegers
+makeChords :: Int -> [Integer]
+makeChords n = take n randIntegers
+
+makeLine :: Int -> Int -> [Integer]
+makeLine n m = take n (makeChords m)
+
+
 
 findAfterStar :: [Char] -> Maybe Char
 findAfterStar (c:d:r) =
