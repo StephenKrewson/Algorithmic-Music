@@ -8,6 +8,7 @@
 <body>
 <div id="content">
 	<h2>A <i>Euterpean</i> Experiment!</h2>
+	<h3>Getting Started: GHCi</h3>
 	<p>N.B. This tutorial assumes you have installed Haskell and the Glasgow Haskell Compiler (GHC). If you're having trouble with the initial steps, check out <a href="http://learnyouahaskell.com/introduction">this fantastic guide</a> by Miran Lipovaca. I'm also assuming that you know how to use git or an equivalent version control system. Other than that, I'll try to be explicit as I can about all the commands we'll be typing. Everything you should type into your computer will be highlighted with <code>this handy code tag</code>. A nice byproduct of this tutorial is that we'll review some basic command line navigation stuff that you might be a little rusty on. But remember that this is a rough-draft DIY guide, written by a novice Haskell programmer (me!). Haskell can and will blow your mind at times, but that's half the fun. OK, with that out of the way, let's dive right in!</p>
 
 	<p>Start by firing up GHC in interactive mode. Head to your terminal (on Windows this will be cmd.exe or PowerShell) and type <code>ghci</code>. This should load a Haskell interpreter like so:</p> 
@@ -22,6 +23,8 @@
 </code>
 </pre>    
 	<p>If this doesn't work, you may need to add the Haskell binaries to your PATH environment variable so that your shell knows where to look for GHCi. But let's suppose you see the screen above. Play around in GHCi by using it like a calculator. Try <code>2 + 5</code> and <code>2 ** 4</code>. You should get 7 and 16, respectively, when you hit enter. Great. Now we're ready to grab the Euterpea music library, which was written by Paul Hudak--one of the original developers of Haskell!</p>
+
+	<h3>Installing Euterpea: Git and VCS</h3>
 
 	<p>Exit GHCi by typing <code>:quit</code>. You should be back in your terminal. Now change over to the directory in which you'd like to store your first Euterpea program. For example, from my home directory (C:\Users\Stephen Krewson\) I would type <code>cd Documents/Haskell</code> and then <code>touch music.hs</code> to create a new file called music.hs in a folder named, appropriately enough, Haskell. But you can make the file wherever you want. Just remember that you'll need to be in that directory when we load our code from the file into GHCi. Your Haskell directory is probably a decent place to stash the Euterpea library, which we'll clone from GitHub, using a repository maintained by Yale PhD student Daniel Winograd-Cort. Run these commands in order.</p>  
 	<pre>
@@ -51,6 +54,8 @@
 	</code>
 	</pre>
 	<p>Did you hear some crazy notes emitted? What the commands above do is first clear your terminal from all the clutter of printing out RandomMusic.hs then load up that file and store a call to the m5 function in a variable called m14. It's not super important what's going on with the 0.5 parameter (it's the sigma or standard deviation parameter for a function that generates 50 random notes using a Gaussian distribution with mean set to 0). I just want to expose you to the syntax of how we can play with pre-loaded functions in GHCi. It's important to know that Haskell functions only ever take one argument--though syntactic "sugar" and "currying" (more on this later) can sometimes make this tricky. Try <code>play m5 0.5</code>. Haskell throws a type error because it looks as if you are applying two arguments (<code>m5</code> and <code>0.5</code>) to <code>play</code>, which is one of Euterpea's built-in functions. The easy way around this is to use <code>fmap</code> and tell GHCi to chain the functions so that <code>m5 0.5</code> is evaluated first and then sent to <code>play</code>. A handy shortcut for <code>fmap</code> is the $ operator. Try <code>play $ m5 0.67</code> (or any value of sigma between 0 and 1). Now it should work!</p>
+
+<h3>Random Chords: Standard Generators and Type Classes</h3>
 
 	<p>Had enough yet? Well, we're just getting started! Now it's time to try to implement Tymoczko's five principles of tonality in Haskell. The beginning is a very good place to start: open up that <code>music.hs</code> file in your favorite text editor. If you read Hudak's freely available <a href="www.cs.yale.edu/homes/hudak/Papers/HSoM.pdf"><i>Haskell School of Music</i> (HSoM)</a>, you will find that the library works (at risk of gross simplification) by mapping numbers to musical pitches. See this in action by typing <code>pitch 60</code> into GHCi (RandomMusic.hs should still be loaded; if not, you'll need to run <code>import Euterpea</code> to get access to the pitch function). From this we see that the integer 60 is mapped to (C, 5) or the note exactly one octave above middle C. Tymoczko says his random triads are taken from the range C2 - C7. Let's use the absolute pitch function to find the range of integers we want: <code>absPitch (C, 2)</code> is 24 and (C, 7) resolves to 84. </p>
 
@@ -89,7 +94,7 @@
 </code></pre>
 
 	<p>I cannot stress how different this approach is than the imperative style of making a bunch of if-else control structures. In just 12 lines of code we have a way to turn an infinite sequence of integers into a finite sequence of chords. mkNote simply takes a pitch (int) and composes it with a duration ("qn" or quarter note) to make a musical note. mkChord takes a group of pitches and recursively stacks them on top of one another into a chord (using the ":=:" infix operator, which just says "play at the same time as"). Chop runs through the array of pitches and divides them up into ordered groupings of three. Now let's reload our file with <code>:r</code> and we're ready for a command that will play 30 random chords: <code>play $ line $ map mkChord $ chop 3 $ take 90 randPitch</code>. Did that work? Good. Compare it with the first sequence in Tymoczko's <a href="http://global.oup.com/us/companion.websites/9780195336672/examples/chapter1/figure_121/">sample sound file</a>.</p>
-
+<h3>Filtering: Lambda Notation and List Comprehensions</h3>
 	<p>
 	But this was the easy part. What about conjunct melodic notation? We need to constrain the triads such that (1) the top note or melody does not make big leaps between chords and (2) the notes in the chords themselves are fairly close together. As it turns out, this is fairly easy using lambda (typed in Haskell as <code>\x</code>) notation. In Tymoczko's Figure 1.2.1.(b) - (d), the biggest span of a single chord seems to be from about (B, 3) to (A, 4). For starters, since the range in absolute pitch is 57 - 47 = 10 between these notes, let's say that the maximum span in our chords is 10. We could write something to the effect of <code>filter (\x -> maximum x - minimum x < 11) $ chop 3 $ take 300 randPitch</code>. Maximum and minimum are built-in functions that extract the max and min of a list. They are subtly different from <code>max</code>, which takes two ordinals and returns the larger one! Notice what GHCi returns (at least for me, using sGen = 42):</p> 
 <pre>
@@ -99,32 +104,35 @@
 	[41,44,50]]
 	</code>
 </pre>     
-	<p>We grabbed 300 random pitches, and chopped them into 100 chords and only 9 of those chords satisfy the property of covering a distance no greater than 11 semitones. So far so good. With each constraint, however, we may need to up how many randPitches we take. Scanning the top notes, we see falls from 60 to 37 and back up to 76 rather quickly. Though I certainly lack the music-theoretic toolbox to implement efficient voice leading, we can at least cut down on these jumps. One good thing to do might be to narrow the 24 - 84 absolute pitch range itself. When Tymoczko starts to clamp on the restraints, the pitch min and max are at (Fs, 3) and (D, 5), a small-ish range of 42 - 62. In lambda notation, we can simply add another condition using <code>&&</code>. Try <code>filter (\x -> maximum x - minimum x < 11 && maximum x < 63 && minimum x > 41) $ chop 3 $ take 3000 randPitch</code>. This is already sounding qualitatively different! Let's assign a variable to our latest bit of code, calling it constraint2 (because it has two filters applied to it).</p> 
+	<p>We grabbed 300 random pitches, and chopped them into 100 chords and only 9 of those chords satisfy the property of covering a distance no greater than 11 semitones. So far so good. With each constraint, however, we may need to up how many randPitches we take. Scanning the top notes, we see falls from 60 to 37 and back up to 76 rather quickly. Though I certainly lack the music-theoretic toolbox to implement efficient voice leading, we can at least cut down on these jumps. One good thing to do might be to narrow the 24 - 84 absolute pitch range itself. When Tymoczko starts to clamp on the restraints, the pitch min and max are at (Fs, 3) and (D, 5), a small-ish range of 42 - 62. In lambda notation, we can simply add another condition using <code>&&</code>. Try <code>filter (\x -> maximum x - minimum x < 11 && maximum x < 63 && minimum x > 41) $ chop 3 $ take 3000 randPitch</code>. This is already sounding qualitatively different! Let's assign variables to our two filters and then make some preset melodies you can play in order of increasing contraint. N.B. Haskell's comment syntax and Euterpea's instrument function.</p>
 <pre>
 <code>
-	constraint2 = instrument RhodesPiano $ line $ map mkChord $ filter (\x -> maximum x - 
-	minimum x < 11 && maximum x < 63 && minimum x > 41) $ chop 3 $ take 3000 randPitch
-</code>. 
-</pre>
+	--constrain total size of the chord: no huge spans!--
+	filterSize n xs = [x | x <- xs, maximum x - minimum x < n]
+	
+	--constrain chord space to absPitch range 42 - 62--
+	filterRange xs = [x | x <- xs, minimum x > 41 && maximum x < 63]
 
-	<p>Whew. I added Euterpea's instrument function in there just for fun. To play constraint2, just type <code>play constraint2</code> once it's been loaded. The melody line in Tymoczko's examples usually moves by about two semitones with each step. We need to write a function that calculates the movement between chords; let's call it "jumpSize." jumpSize takes a list and returns a list of the distance between each list element. Note the second line, which deals with the case of reaching the end of the list.</p>
-<pre>
-<code>
-	jumpSize :: (Num a) => [a] -> [a]
-	jumpSize (x:[]) = []
-	jumpSize (x:xs) = abs (x - head xs) : jumpSize xs
+	--Here are some playable melodies, in order of increasing tonality constraints--
+	m1 = instrument RhodesPiano $ line $ map mkChord $ take 10 $ chop 3 $ randPitch
+	m2 = line $ map mkChord $ take 10 $ filterSize 11 $ chop 3 $ randPitch
+	m3 = line $ map mkChord $ take 10 $ filterSize 11 $ filterRange $ chop 3 $ randPitch
 </code>
 </pre>
-	<p>With our new, shiny bit of recursion saved and with music.hs reloaded into GHCi, we can use jumpSize to get a sense of how far each chord is moving. Then we can throw out all sequences that contain a jump greater than, let's say three, semitones. This will be quite the filter, so we should grab quite a few randPitches. In fact, let's save some keystrokes by saving a bunch of chords into a variable. In music.hs, add <code>chords1 = filter (\x -> maximum x - minimum x < 11) $ chop 3 $ take 30000 randPitch</code>. Reload and type <code>length chords1</code> into GHCi. I got a length of 790, which should be enough to work with for now.  
-	</p>
 
+<h3>At an Impasse: Monads</h3>
+<p>As it turns out, though, it's very hard to get the efficient voice leading to work with our current approach. A function like the following could prepend the distance between chord x and chord y to the beginning of chord x. Still,  there's no good way to rearrange the list or store indexes of chords that would work together in a functional setup. Functional languages don't like mutable data!</p>  
 
+<pre>
+<code>
+	jumpSize :: (Num a, Ord a) => [[a]] -> [[a]]
+	jumpSize (_:[]) = []
+	jumpSize (x:y:[]) = (abs (maximum x - maximum y) : x) : []
+	jumpSize (x:y:zs) = (abs (maximum x - maximum y) : x) : jumpSize (y:zs)
+</code>
+</pre>
 
-	<!--Section 3: Conclusion-->
-
-	
-
-
+<p>Rather than filtering down from and endless set of chords, we need to generate a new chord each time--using monads. This is not to say that our work above was wasted! On the contrary, it exposed us to list manipulation, recursion, pattern-matching, lambda notation, and much more. Monads are beyond the scope of this post, but I'll close with a very helpful example shared with me on the indispensable Q&A community <a href="www.stackoverflow.com">Stack Overflow</a> by user Aaron Stevens. Try running <a href="https://gist.github.com/bheklilr/6c16c338063644a208c8">his code</a>, which will require you to first <code>caball install MonadRandom</code>. Next time, we'll use this as a jumping point to talk about (1) best practices for installing an environment with Cabal, (2) the state monad, which is able to track values that change over time (i.e. are mutable), and (3) how to write the main section of a program with IO. Please comment or email me at the address to the left. I've put the functions we wrote up on a <a href"https://gist.github.com/StephenKrewson/694d0c58d9734f3afc9c">private GitHub gist</a> for easy reference. See you next time and thanks for following along!</p>
 
 </div>
 </body>
