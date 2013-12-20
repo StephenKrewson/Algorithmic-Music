@@ -6,19 +6,34 @@ import Data.List
 --pattern match n (x:y:zs) to get two indexes in filter 
 
 
-jumpSize :: (Num a) => [a] -> [a]
-jumpSize (x:[]) = []
-jumpSize (x:xs) = abs (x - head xs) : jumpSize xs
+jumpSize' :: (Num a) => [a] -> [a]
+jumpSize' (x:[]) = []
+jumpSize' (x:xs) = abs (x - head xs) : jumpSize' xs
 
 --takes a list of lists, finds difference between max value of current chord and following chord, prepends that delta--
-jumpSize' :: (Num a, Ord a) => [[a]] -> [[a]]
-jumpSize' (_:[]) = []
-jumpSize' (x:y:[]) = (abs (maximum x - maximum y) : x) : []
-jumpSize' (x:y:zs) = (abs (maximum x - maximum y) : x) : jumpSize' (y:zs)
+jumpSize :: (Num a, Ord a) => [[a]] -> [[a]]
+jumpSize (_:[]) = []
+jumpSize (x:y:[]) = (abs (maximum x - maximum y) : x) : []
+jumpSize (x:y:zs) = (abs (maximum x - maximum y) : x) : jumpSize (y:zs)
+
+jumpSize1 :: (Num a, Ord a) => [[a]] -> [[a]]
+jumpSize1 (_:[]) = []
+jumpSize1 (w:x:y:[]) = (abs (maximum x - maximum w) : x ++ [abs (maximum x - maximum y)]) : []
+jumpSize1 (w:x:y:zs) = (abs (maximum x - maximum w) : x ++ [abs (maximum x - maximum y)]) : jumpSize (x:y:zs)
+
 
 --maybe make this even more recursive? or find a way to use jumpSize to find the strings of 222222222--
 --i can probably get rid of the 42 - 62 filter once this is working: because overdetermination--
 --still useful to filter out huge leaping chords--
+
+test1 = [[1,2,3], [3,5,6], [7,5,4], [2,9,10]]
+
+jumpRecur :: (Num a, Ord a) => a -> [[a]] -> [[a]]
+jumpRecur n (xs)
+	| [x | x <- xs, head x > n] == []	= xs
+	| otherwise 						= jumpRecur n $ jumpSize $ filter (\x -> head x <= n) xs
+
+
 
 --chop 3 $ getPitch 120
 chop :: (Ord a) => Int -> [a] -> [[a]]
@@ -49,18 +64,14 @@ mkChord (p:ps) = mkNote p :=: mkChord ps
 
 --play $ mkChord $ getPitch 7--mk
 
-
-chords1 = take 8 $ filter (\x -> maximum x - minimum x < 11) $ chop 3 $ randPitch
-
-
-
-constraint2 = take 8 $ filter (\x -> maximum x - minimum x < 11 && maximum x < 63 && minimum x > 41) $ chop 3 $ randPitch
-bunch = filter (\x -> (maximum x - minimum x) < 12) $ chop 3 $ getPitch 3000
-bunch2 = filter (\x -> maximum x < 80) $ map sort bunch
+--constrain total size of the chord: no huge spans!--
+filterSize n xs = [x | x <- xs, maximum x - minimum x < n]
+--constrain chord space to absPitch range 42 - 62--
+filterRange xs = [x | x <- xs, minimum x > 41 && maximum x < 63]
+--can also be written as lambda functions with 'filter'--
 
 
---play $ line $ map mkChord $ chop 3 $ getPitch 120--
-m5 = instrument AcousticBass $ line $ map mkChord $ chop 3 $ getPitch 30
-m6 = instrument AcousticBass $ line $ map mkChord $ bunch
-
-m7 = instrument RhodesPiano $ line $ map mkChord $ filter (\x -> 50 < maximum x && maximum x < 70) $ bunch
+--Here are the melodies, in order of increasing tonality constraints--
+m1 = instrument RhodesPiano $ line $ map mkChord $ take 10 $ chop 3 $ randPitch
+m2 = line $ map mkChord $ take 10 $ filterSize 11 $ chop 3 $ randPitch
+m3 = line $ map mkChord $ take 10 $ filterSize 11 $ filterRange $ chop 3 $ randPitch
